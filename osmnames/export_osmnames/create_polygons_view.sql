@@ -7,8 +7,20 @@ SELECT
   abs(osm_id)::VARCHAR as osm_id,
   determine_class(type) AS class,
   type,
-  round(ST_X(ST_PointOnSurface(ST_Buffer(ST_Transform(geometry, 4326), 0.0)))::numeric::numeric, 5) AS lon,
-  round(ST_Y(ST_PointOnSurface(ST_Buffer(ST_Transform(geometry, 4326), 0.0)))::numeric::numeric, 5) AS lat,
+  cast(
+        case
+            when coalesce(osm_polygon.lon, '') = '' then round(ST_X(ST_PointOnSurface(ST_Buffer(ST_Transform(osm_polygon.geometry, 4326), 0.0)))::numeric::numeric, 5)
+            else osm_polygon.lon::numeric
+        end
+        as float
+    ) as lon,
+  cast(
+        case
+            when coalesce(osm_polygon.lat, '') = '' then round(ST_Y(ST_PointOnSurface(ST_Buffer(ST_Transform(osm_polygon.geometry, 4326), 0.0)))::numeric::numeric, 5)
+            else osm_polygon.lat::numeric
+        end
+        as float
+    ) as lat,
   place_rank,
   get_importance(place_rank, wikipedia, parentInfo.country_code) AS importance,
   NULL::TEXT AS street,

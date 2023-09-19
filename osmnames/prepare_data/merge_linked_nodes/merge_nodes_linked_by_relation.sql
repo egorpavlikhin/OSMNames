@@ -8,7 +8,9 @@ CREATE VIEW polygons_with_linked_by_relation_node AS (
     point.osm_id AS linked_node_osm_id,
     point.all_tags AS linked_node_tags,
     point.wikipedia AS linked_node_wikipedia,
-    point.wikidata AS linked_node_wikidata
+    point.wikidata AS linked_node_wikidata,
+    ST_Y(ST_Transform(point.geometry, 4236))::text AS linked_node_lat,
+    ST_X(ST_Transform(point.geometry, 4236))::text AS linked_node_lon
   FROM osm_polygon AS polygon
   INNER JOIN osm_relation_member AS relation
     ON relation.member_type = 0
@@ -39,7 +41,21 @@ UPDATE osm_polygon AS polygon
 SET merged_osm_id = linked_node_osm_id,
     all_tags = polygon.all_tags || linked_node_tags,
     wikipedia = COALESCE(NULLIF(polygon.wikipedia, ''), linked_node_wikipedia),
-    wikidata = COALESCE(NULLIF(polygon.wikidata, ''), linked_node_wikidata)
+    wikidata = COALESCE(NULLIF(polygon.wikidata, ''), linked_node_wikidata),
+    lat = cast(
+        case
+            when coalesce(linked_node_lat, '') = '' then round(ST_Y(ST_PointOnSurface(ST_Buffer(ST_Transform(polygon.geometry, 4326), 0.0)))::numeric::numeric, 5)
+            else linked_node_lat::numeric
+        end
+        as float
+    ),
+    lon = cast(
+        case
+            when coalesce(linked_node_lon, '') = '' then round(ST_X(ST_PointOnSurface(ST_Buffer(ST_Transform(polygon.geometry, 4326), 0.0)))::numeric::numeric, 5)
+            else linked_node_lon::numeric
+        end
+        as float
+    )
 FROM polygons_with_linked_by_relation_node
 WHERE polygon_id = polygon.id;
 
@@ -47,4 +63,4 @@ UPDATE osm_point
   SET merged = true
   WHERE id = ANY(SELECT linked_node_id FROM polygons_with_linked_by_relation_node);
 
-DROP VIEW polygons_with_linked_by_relation_node;
+-- DROP VIEW polygons_with_linked_by_relation_node;

@@ -16,7 +16,8 @@ def export_osmnames():
     create_views()
     create_export_dir()
     export_geonames()
-    export_housenumbers()
+    #export_polygons_with_linked_by_relation_node()
+    #export_housenumbers()
     gzip_tsv_files()
 
 
@@ -74,6 +75,10 @@ def export_geonames():
     export_to_tsv("SELECT * FROM geonames_view ORDER BY importance DESC NULLS LAST", geonames_export_path())
 
 
+def export_polygons_with_linked_by_relation_node():
+    log.info("export polygons with linked by relation node to {}".format(geonames_export_path()))
+    export_to_tsv("SELECT * FROM polygons_with_linked_by_relation_node", geonames_export_path())
+
 def export_housenumbers():
     log.info("export housenumbers to {}".format(housenumbers_export_path()))
     export_to_tsv("SELECT * FROM mv_housenumbers", housenumbers_export_path())
@@ -90,7 +95,7 @@ def export_to_tsv(query, path):
 
 
 def gzip_tsv_files():
-    for tsv_file_path in [geonames_export_path(), housenumbers_export_path()]:
+    for tsv_file_path in [geonames_export_path()]: #, housenumbers_export_path()
         with open(tsv_file_path, 'rb') as f_in, gzip.open("{}.gz".format(tsv_file_path), 'wb') as f_out:
             shutil.copyfileobj(f_in, f_out)
 

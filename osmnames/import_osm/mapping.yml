@@ -85,6 +85,12 @@ tables:
     - key: admin_level
       name: admin_level
       type: integer
+    - key: lat
+      name: lat
+      type: string
+    - key: lon
+      name: lon
+      type: string
     mapping:
       place:
       - city

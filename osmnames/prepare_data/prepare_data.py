@@ -18,7 +18,7 @@ def prepare_data():
     follow_wikipedia_redirects()
     create_hierarchy()
     merge_corresponding_linestrings()
-    prepare_housenumbers()
+    #prepare_housenumbers()
 
 
 def configure_for_preparation():
