@@ -177,6 +177,25 @@ tables:
       - station
       aeroway:
       - aerodrome
+  housenumber:
+    type: geometry
+    fields:
+    - name: osm_id
+      type: id
+    - name: geometry
+      type: geometry
+    - key: name
+      name: name
+      type: string
+    - key: addr:street
+      name: street
+      type: string
+    - key: addr:housenumber
+      name: housenumber
+      type: string
+    - key: addr:place
+      name: place
+      type: string
   relation:
     type: relation
     columns:
